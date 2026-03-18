@@ -92,14 +92,14 @@ export function ImmersiveExperience() {
   const tunnelFilter = useMotionTemplate`blur(${tunnelBlur}px)`;
   const cinematicPause = ruptureActive || (progress > 0.84 && !canBlow) || (progress > 0.46 && progress < 0.52);
   const finaleFocusActive = progress > 0.84;
-  const whispers = useMemo(
-    () => [
-      "Las nubes se apiñan para oir tu risa.",
-      "Los vientos se entorpecen para oir tu nombre.",
-      "Las olas se aquietan para admirarte..",
-    ],
-    [],
-  );
+  // const whispers = useMemo(
+  //   () => [
+  //     "Las nubes se apiñan para oir tu risa.",
+  //     "Los vientos se entorpecen para oir tu nombre.",
+  //     "Las olas se aquietan para admirarte..",
+  //   ],
+  //   [],
+  // );
   const {
     candlesOff,
     completed,
@@ -263,23 +263,23 @@ export function ImmersiveExperience() {
 
   const whisperEnabled = progress > 0.12 && progress < 0.82;
 
-  useEffect(() => {
-    if (!whisperEnabled) {
-      setWhisper("");
-      return;
-    }
-    if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
-    whisperIntervalRef.current = window.setInterval(() => {
-      const message = whispers[Math.floor(Math.random() * whispers.length)];
-      setWhisper(message);
-      if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
-      whisperTimeoutRef.current = window.setTimeout(() => setWhisper(""), 2400);
-    }, 5300);
-    return () => {
-      if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
-      if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
-    };
-  }, [whisperEnabled, whispers]);
+  // useEffect(() => {
+  //   if (!whisperEnabled) {
+  //     setWhisper("");
+  //     return;
+  //   }
+  //   if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
+  //   whisperIntervalRef.current = window.setInterval(() => {
+  //     const message = whispers[Math.floor(Math.random() * whispers.length)];
+  //     setWhisper(message);
+  //     if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
+  //     whisperTimeoutRef.current = window.setTimeout(() => setWhisper(""), 2400);
+  //   }, 5300);
+  //   return () => {
+  //     if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
+  //     if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
+  //   };
+  // }, [whisperEnabled, whispers]);
 
   useEffect(() => {
     if (memoryUnlocked) return;
@@ -521,9 +521,9 @@ export function ImmersiveExperience() {
           transition={{ duration: 1.2 }}
         >
           <p className="font-serif text-2xl text-[#fff1f4] md:text-4xl">
-            Feliz cumpleanos.
+            Feliz cumpleaños.
             <br />
-            Te quiero mucho.
+            Te quiero mucho preciosa :).
           </p>
         </motion.div>
 
@@ -533,7 +533,7 @@ export function ImmersiveExperience() {
           transition={{ duration: 0.9 }}
         />
 
-        <motion.div
+        {/* <motion.div
           className="pointer-events-none absolute left-1/2 top-24 z-40 w-full max-w-md -translate-x-1/2 px-6"
           initial={false}
           animate={{ opacity: memoryUnlocked ? 1 : 0, y: memoryUnlocked ? 0 : 14 }}
@@ -542,7 +542,7 @@ export function ImmersiveExperience() {
           <div className="rounded-2xl border border-[#f2d8df]/25 bg-[#1a0e17]/65 p-4 text-center text-sm text-[#f2d8df] backdrop-blur">
             Recuerdo desbloqueado: &quot;Eres maravillosa, mi amor.&quot;
           </div>
-        </motion.div>
+        </motion.div> */}
 
         <motion.div
           className="pointer-events-none absolute inset-0 z-70 bg-[radial-gradient(circle_at_center,rgba(255,223,192,0.34),rgba(35,14,22,0.96)_62%)]"

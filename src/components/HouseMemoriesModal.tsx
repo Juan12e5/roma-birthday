@@ -40,15 +40,15 @@ export function HouseMemoriesModal({ open, onClose }: HouseMemoriesModalProps) {
 
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           {[
-            { text: "Vestido que decora tu belleza", img: roma1 },
-            { text: "Tu mirada en lo cotidiano", img: roma2 },
-            { text: "Tu risa que me encanta", img: roma3 },
+            { text: "Tu risa en silencio", img: roma1 },
+            { text: "Tu luz en lo cotidiano", img: roma2 },
+            { text: "Tu forma de volver todo hogar", img: roma3 },
           ].map((item) => (
             <article
               key={item.text}
               className="rounded-2xl border border-[#f2d7de]/15 bg-[#2b0f1b]/55 p-4 text-base"
             >
-              <div className="h-80 overflow-hidden rounded-xl sm:h-96 md:h-120 lg:h-144">
+              <div className="h-[36rem] rounded-xl overflow-hidden md:h-[40rem] lg:h-[44rem]">
                 <Image
                   src={item.img}
                   alt={item.text}

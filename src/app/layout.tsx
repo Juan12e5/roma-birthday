@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Para Roma - Feliz Cumpleanos",
-  description: "Una experiencia para Roma, feliz cumpleanos! ",
+  title: "Para Roma - Feliz Cumpleaños",
+  description: "Una experiencia para Roma, feliz cumpleaños! ",
 };
 
 export default function RootLayout({
