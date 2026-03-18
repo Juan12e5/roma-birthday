@@ -616,7 +616,7 @@ export function ImmersiveExperience() {
               }}
               transition={{ duration: 0.8 }}
             >
-              Entrando a tu hogar...
+              Entrando a un lugar especial...
             </motion.p>
           </div>
         </motion.div>
