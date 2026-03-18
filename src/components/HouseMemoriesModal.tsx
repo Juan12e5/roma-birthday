@@ -40,9 +40,9 @@ export function HouseMemoriesModal({ open, onClose }: HouseMemoriesModalProps) {
 
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           {[
-            { text: "Tu risa en silencio", img: roma1 },
-            { text: "Tu luz en lo cotidiano", img: roma2 },
-            { text: "Tu forma de volver todo hogar", img: roma3 },
+            { text: "Vestido que decora tu belleza", img: roma1 },
+            { text: "Tu mirada en lo cotidiano", img: roma2 },
+            { text: "Tu risa que me encanta", img: roma3 },
           ].map((item) => (
             <article
               key={item.text}
