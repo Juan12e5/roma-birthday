@@ -6,10 +6,10 @@ import Lenis from "lenis";
 export function useLenis() {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.35,
+      duration: 1.8,
       smoothWheel: true,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 1.2,
+      wheelMultiplier: 0.65,
+      touchMultiplier: 0.95,
     });
 
     let rafId = 0;

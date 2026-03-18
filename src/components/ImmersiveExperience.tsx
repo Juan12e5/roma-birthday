@@ -39,6 +39,7 @@ export function ImmersiveExperience() {
   const [progress, setProgress] = useState(0);
   const [anticipation, setAnticipation] = useState(false);
   const [wishMessageVisible, setWishMessageVisible] = useState(false);
+  const [showGuide, setShowGuide] = useState(true);
   const [canBlow, setCanBlow] = useState(false);
   const [ruptureActive, setRuptureActive] = useState(false);
   const [ruptureDone, setRuptureDone] = useState(false);
@@ -92,6 +93,18 @@ export function ImmersiveExperience() {
   const tunnelFilter = useMotionTemplate`blur(${tunnelBlur}px)`;
   const cinematicPause = ruptureActive || (progress > 0.84 && !canBlow) || (progress > 0.46 && progress < 0.52);
   const finaleFocusActive = progress > 0.84;
+  const guideSteps = useMemo(
+    () => [
+      "Da click dos veces en MUTE/SONIDO hasta escuchar la música. Pista, es tu favorita",
+      "Si deseas silenciar, vuelve a presionar MUTE.",
+      "Toca las flores para descubrir mensajes especiales.",
+      "Haz click en la casa para revelar una sorpresa.",
+      "Desliza con calma: el recorrido está pensado para ser tranquilo y relajado. Tomate tu tiempo cariño y disfruta también de tu canción favorita.",
+      "Para mejor experiencia audiovisual: usa audífonos, brillo medio y pantalla completa.",
+      "Se puede visualizar en dispositivos móviles pero para una mejor experiencia se recomienda usar un computador."
+    ],
+    [],
+  );
   // const whispers = useMemo(
   //   () => [
   //     "Las nubes se apiñan para oir tu risa.",
@@ -289,6 +302,12 @@ export function ImmersiveExperience() {
   }, [beamInteractions, flowerInteractions, houseOpen, memoryUnlocked]);
 
   useEffect(() => {
+    if (progress > 0.34 && showGuide) {
+      setShowGuide(false);
+    }
+  }, [progress, showGuide]);
+
+  useEffect(() => {
     return () => {
       if (houseTransitionTimeoutRef.current) {
         window.clearTimeout(houseTransitionTimeoutRef.current);
@@ -315,12 +334,16 @@ export function ImmersiveExperience() {
     }, 1400);
   };
 
-  const activePhase = useMemo(
-    () =>
-      STORY_PHASES.find((phase) => progress >= phase.start && progress <= phase.end) ??
-      STORY_PHASES[STORY_PHASES.length - 1],
-    [progress],
-  );
+  const activePhase = useMemo(() => {
+    for (let index = 0; index < STORY_PHASES.length; index += 1) {
+      const phase = STORY_PHASES[index];
+      const isLast = index === STORY_PHASES.length - 1;
+      if (progress >= phase.start && (isLast ? progress <= phase.end : progress < phase.end)) {
+        return phase;
+      }
+    }
+    return STORY_PHASES[STORY_PHASES.length - 1];
+  }, [progress]);
 
   return (
     <main ref={containerRef} className="relative h-[650vh] bg-[#050505]">
@@ -418,6 +441,36 @@ export function ImmersiveExperience() {
           </span>
         </div>
 
+        <motion.aside
+          className="absolute bottom-3 left-1/2 z-60 w-[min(94vw,32rem)] -translate-x-1/2 rounded-2xl border border-[#f2d8df]/28 bg-[#120a12]/80 p-3 text-left text-[#ffeef3] shadow-[0_0_42px_rgba(255,171,128,0.2)] backdrop-blur-md sm:bottom-4 sm:p-4 md:p-5"
+          initial={false}
+          animate={{
+            opacity: showGuide && !finaleFocusActive ? 1 : 0,
+            x: showGuide && !finaleFocusActive ? 0 : -20,
+            y: showGuide && !finaleFocusActive ? 0 : -8,
+          }}
+          transition={{ duration: 0.45 }}
+          style={{
+            pointerEvents: showGuide && !finaleFocusActive ? "auto" : "none",
+          }}
+        >
+          <p className="text-[10px] tracking-[0.2em] text-[#f8d7df]/78 sm:text-[11px] sm:tracking-[0.22em]">
+            GUIA PASO A PASO
+          </p>
+          <ol className="mt-3 max-h-[36svh] list-decimal space-y-2 overflow-y-auto pr-1 pl-4 text-[11px] leading-relaxed text-[#ffeef3]/90 sm:max-h-[42svh] sm:pl-5 sm:text-xs md:max-h-[45vh] md:text-sm">
+            {guideSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <button
+            type="button"
+            onClick={() => setShowGuide(false)}
+            className="mt-4 w-full rounded-full border border-[#f2d8df]/35 px-4 py-2 text-[11px] tracking-[0.14em] text-[#fff1f5] hover:bg-[#f2d8df]/12 sm:mt-5 sm:w-auto sm:py-1.5"
+          >
+            ENTENDIDO
+          </button>
+        </motion.aside>
+
         <motion.div
           className="pointer-events-none absolute bottom-12 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#f3dce3]/20 bg-[#120b10]/65 px-5 py-2 text-sm text-[#f9e7ec]"
           initial={false}
@@ -452,7 +505,7 @@ export function ImmersiveExperience() {
 
         {finaleFocusActive && (
           <motion.div
-            className="absolute bottom-3 z-50 w-[min(92vw,30rem)] px-3 text-left sm:bottom-6 sm:left-6 sm:px-4 md:bottom-8 md:left-8"
+            className="absolute bottom-3 z-50 w-[min(92vw,20rem)] px-3 text-left sm:bottom-6 sm:left-6 sm:px-4 md:bottom-8 md:left-8"
             initial={{ opacity: 0, y: 24, x: -24 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}

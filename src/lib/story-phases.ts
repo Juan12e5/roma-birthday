@@ -38,10 +38,18 @@ export const STORY_PHASES: StoryPhase[] = [
   {
     id: "celebracion",
     start: 0.82,
-    end: 1,
+    end: 0.9,
     title: "Hoy",
-    text: "Hoy las olas aplauden tu tiempo, los faros cantan tu nombre, y la casa entera respira: feliz día de vida, de historias, de todo lo que aún no sabemos que florecerá contigo. ",
+    text: "Hoy las olas aplauden tu tiempo, los faros cantan tu nombre, y la casa entera respira: feliz día de vida, de historias, de todo lo que aún no sabemos que florecerá contigo.",
   },
+
+  {
+    id: "finale",
+    start: 0.9,
+    end: 1.2,
+    title: "Feliz cumpleaños, Roma!",
+    text: "Que este nuevo año de vida sea un viaje lleno de momentos inolvidables, risas compartidas y sueños realizados, y que Dios y su amor te acompañen siempre, y me permita seguir a tu lado en este viaje.",
+  }
 ];
 
 export const FLOWER_MESSAGES = [
