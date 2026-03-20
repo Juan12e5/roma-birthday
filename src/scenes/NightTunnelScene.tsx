@@ -11,6 +11,7 @@ type SceneProps = {
   finalProgress: number;
   candlesOff: number;
   cinematicPause: boolean;
+  lowPerformance: boolean;
   onHouseOpen: () => void;
   onCakePress: () => void;
   onFlowerMessage: (message: string) => void;
@@ -25,6 +26,7 @@ function World({
   finalProgress,
   candlesOff,
   cinematicPause,
+  lowPerformance,
   onHouseOpen,
   onCakePress,
   onFlowerMessage,
@@ -61,8 +63,12 @@ function World({
   const beamSweepCooldownRef = useRef(0);
   const seaBaseRef = useRef<Float32Array | null>(null);
   const valleyBaseRef = useRef<Float32Array | null>(null);
+  const frameCounterRef = useRef(0);
   const fogColor = useMemo(() => new THREE.Color("#050505"), []);
-  const ringZ = useMemo(() => Array.from({ length: 18 }, (_, i) => -8 - i * 8), []);
+  const ringZ = useMemo(
+    () => Array.from({ length: lowPerformance ? 12 : 18 }, (_, i) => -8 - i * 8),
+    [lowPerformance],
+  );
   const candleSlots = useMemo(
     () =>
       Array.from({ length: 21 }, (_, index) => {
@@ -79,7 +85,7 @@ function World({
   );
   const flowerSeeds = useMemo(() => {
     const entries: { x: number; z: number; s: number }[] = [];
-    for (let i = 0; i < 120; i += 1) {
+    for (let i = 0; i < (lowPerformance ? 72 : 120); i += 1) {
       const angle = (i * 0.43) % (Math.PI * 2);
       const radius = 2.1 + (i % 17) * 0.35;
       const x = Math.cos(angle) * radius + ((i % 5) - 2) * 0.12;
@@ -87,9 +93,11 @@ function World({
       entries.push({ x, z, s: 0.82 + (i % 3) * 0.16 });
     }
     return entries;
-  }, []);
+  }, [lowPerformance]);
 
   useFrame((state, delta) => {
+    frameCounterRef.current += 1;
+    const updateDynamicTerrain = !lowPerformance || frameCounterRef.current % 3 === 0;
     const rhythmFactor = cinematicPause
       ? 0.08
       : progress > 0.84 && candlesOff === 0
@@ -248,7 +256,7 @@ function World({
       cakeFillLightRef.current.intensity = 0.35 + cakeFocus * 1.4 + wishDoneBoost * 0.4;
     }
 
-    if (seaRef.current) {
+    if (seaRef.current && updateDynamicTerrain) {
       const geometry = seaRef.current.geometry as THREE.PlaneGeometry;
       const positionAttr = geometry.attributes.position;
       if (!seaBaseRef.current) {
@@ -265,10 +273,12 @@ function World({
         arr[i + 2] = wave;
       }
       positionAttr.needsUpdate = true;
-      geometry.computeVertexNormals();
+      if (!lowPerformance || frameCounterRef.current % 6 === 0) {
+        geometry.computeVertexNormals();
+      }
     }
 
-    if (valleyRef.current) {
+    if (valleyRef.current && updateDynamicTerrain) {
       const geometry = valleyRef.current.geometry as THREE.PlaneGeometry;
       const positionAttr = geometry.attributes.position;
       if (!valleyBaseRef.current) {
@@ -284,7 +294,9 @@ function World({
         arr[i + 2] = ridge + wind;
       }
       positionAttr.needsUpdate = true;
-      geometry.computeVertexNormals();
+      if (!lowPerformance || frameCounterRef.current % 6 === 0) {
+        geometry.computeVertexNormals();
+      }
     }
 
     flameRefs.current.forEach((flame, index) => {
@@ -358,8 +370,22 @@ function World({
         distance={24}
       />
 
-      <Stars radius={120} depth={90} count={2200} factor={5} saturation={0} speed={0.18} />
-      <Stars radius={220} depth={180} count={5800} factor={7} saturation={0} speed={0.08} />
+      <Stars
+        radius={120}
+        depth={90}
+        count={lowPerformance ? 900 : 2200}
+        factor={5}
+        saturation={0}
+        speed={0.18}
+      />
+      <Stars
+        radius={220}
+        depth={180}
+        count={lowPerformance ? 1800 : 5800}
+        factor={7}
+        saturation={0}
+        speed={0.08}
+      />
 
       {ringZ.map((z, index) => (
         <mesh key={z} name={`ring-${index}`} position={[0, 0.4, z]}>
@@ -480,7 +506,7 @@ function World({
       </group>
 
       <mesh ref={valleyRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.35, -11.5]}>
-        <planeGeometry args={[30, 22, 72, 72]} />
+        <planeGeometry args={[30, 22, lowPerformance ? 40 : 72, lowPerformance ? 40 : 72]} />
         <meshStandardMaterial color="#2f3b38" roughness={0.96} metalness={0.05} />
       </mesh>
 
@@ -510,7 +536,7 @@ function World({
         </mesh>
 
         <mesh ref={seaRef} rotation={[-Math.PI / 2.05, 0, 0]} position={[0, -0.65, -8]}>
-          <planeGeometry args={[30, 24, 56, 56]} />
+          <planeGeometry args={[30, 24, lowPerformance ? 28 : 56, lowPerformance ? 28 : 56]} />
           <meshStandardMaterial color="#1a3a5f" roughness={0.35} metalness={0.2} transparent opacity={0.84} />
         </mesh>
 
@@ -558,15 +584,17 @@ function World({
                   <coneGeometry args={[0.032, 0.11, 10]} />
                   <meshBasicMaterial color="#ffbf6e" transparent opacity={0.92} />
                 </mesh>
-                <pointLight
-                  ref={(element) => {
-                    flameLightRefs.current[slot.index] = element;
-                  }}
-                  position={[0, slot.stemHeight + 0.07, 0]}
-                  color="#ffcc87"
-                  intensity={0.52}
-                  distance={2.3}
-                />
+                {(!lowPerformance || slot.index % 4 === 0) && (
+                  <pointLight
+                    ref={(element) => {
+                      flameLightRefs.current[slot.index] = element;
+                    }}
+                    position={[0, slot.stemHeight + 0.07, 0]}
+                    color="#ffcc87"
+                    intensity={0.52}
+                    distance={2.3}
+                  />
+                )}
                 <mesh
                   position={[0, slot.stemHeight + 0.03, 0]}
                   ref={(element) => {
@@ -597,7 +625,7 @@ function World({
         />
 
         <Sparkles
-          count={finalProgress > 0.72 ? 90 : 30}
+          count={lowPerformance ? (finalProgress > 0.72 ? 50 : 18) : finalProgress > 0.72 ? 90 : 30}
           scale={[16, 5, 12]}
           position={[0, 0.6, -8]}
           speed={0.22}
@@ -605,7 +633,7 @@ function World({
           size={1.8}
         />
         <Sparkles
-          count={120}
+          count={lowPerformance ? 64 : 120}
           scale={[26, 8, 20]}
           position={[0, 2.4, -12]}
           speed={0.08}
@@ -613,7 +641,7 @@ function World({
           size={1.2}
         />
         <Sparkles
-          count={180}
+          count={lowPerformance ? 96 : 180}
           scale={[46, 14, 42]}
           position={[0, 4.8, -26]}
           speed={0.05}
@@ -626,8 +654,13 @@ function World({
 }
 
 export function NightTunnelScene(props: SceneProps) {
+  const dprRange: [number, number] = props.lowPerformance ? [0.6, 1] : [1, 1.5];
   return (
-    <Canvas camera={{ fov: 55, near: 0.1, far: 220, position: [0, 1.2, 14] }} dpr={[1, 1.5]}>
+    <Canvas
+      camera={{ fov: 55, near: 0.1, far: 220, position: [0, 1.2, 14] }}
+      dpr={dprRange}
+      gl={{ antialias: !props.lowPerformance, powerPreference: "high-performance" }}
+    >
       <World {...props} />
     </Canvas>
   );

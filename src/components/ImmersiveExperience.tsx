@@ -53,7 +53,6 @@ export function ImmersiveExperience() {
   const houseTransitionTimeoutRef = useRef<number | null>(null);
   const blowPauseTimeoutRef = useRef<number | null>(null);
   const whisperTimeoutRef = useRef<number | null>(null);
-  const whisperIntervalRef = useRef<number | null>(null);
   const confettiRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const confettiPlayedRef = useRef(false);
   const confettiTimelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -281,26 +280,6 @@ export function ImmersiveExperience() {
     return () => window.clearTimeout(id);
   }, [progress, ruptureDone]);
 
-  const whisperEnabled = progress > 0.12 && progress < 0.82;
-
-  // useEffect(() => {
-  //   if (!whisperEnabled) {
-  //     setWhisper("");
-  //     return;
-  //   }
-  //   if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
-  //   whisperIntervalRef.current = window.setInterval(() => {
-  //     const message = whispers[Math.floor(Math.random() * whispers.length)];
-  //     setWhisper(message);
-  //     if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
-  //     whisperTimeoutRef.current = window.setTimeout(() => setWhisper(""), 2400);
-  //   }, 5300);
-  //   return () => {
-  //     if (whisperIntervalRef.current) window.clearInterval(whisperIntervalRef.current);
-  //     if (whisperTimeoutRef.current) window.clearTimeout(whisperTimeoutRef.current);
-  //   };
-  // }, [whisperEnabled, whispers]);
-
   useEffect(() => {
     if (memoryUnlocked) return;
     if (flowerInteractions >= 3 && beamInteractions >= 2 && houseOpen) {
@@ -324,9 +303,6 @@ export function ImmersiveExperience() {
       }
       if (whisperTimeoutRef.current) {
         window.clearTimeout(whisperTimeoutRef.current);
-      }
-      if (whisperIntervalRef.current) {
-        window.clearInterval(whisperIntervalRef.current);
       }
       confettiTimelineRef.current?.kill();
     };
@@ -369,12 +345,16 @@ export function ImmersiveExperience() {
   return (
     <main ref={containerRef} className="relative h-[650vh] bg-[#050505]">
       <div className="sticky top-0 h-screen overflow-hidden">
-        <motion.div className="absolute inset-0 z-0" style={{ filter: tunnelFilter }}>
+        <motion.div
+          className="absolute inset-0 z-0"
+          style={showDepthSlider ? undefined : { filter: tunnelFilter }}
+        >
           <NightTunnelScene
             progress={progress}
             finalProgress={finalProgress}
             candlesOff={candlesOff}
             cinematicPause={cinematicPause}
+            lowPerformance={showDepthSlider}
             onHouseOpen={handleHouseOpen}
             onCakePress={() => {
               if (!canBlow) {
