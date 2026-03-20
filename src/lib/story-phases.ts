@@ -58,5 +58,6 @@ export const FLOWER_MESSAGES = [
   "Felicidades, mi amor.",
   "Tu mirada me encanta.",
   "Elijo estar contigo.",
+  "Hace dos días sumaste años edad, y yo sumo ganas de seguir contigo.",
 ];
 

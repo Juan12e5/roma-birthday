@@ -40,7 +40,7 @@ export function ImmersiveExperience() {
   const [anticipation, setAnticipation] = useState(false);
   const [wishMessageVisible, setWishMessageVisible] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
-  const [showDepthSlider, setShowDepthSlider] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const [canBlow, setCanBlow] = useState(false);
   const [ruptureActive, setRuptureActive] = useState(false);
   const [ruptureDone, setRuptureDone] = useState(false);
@@ -88,7 +88,7 @@ export function ImmersiveExperience() {
 
   useEffect(() => {
     const media = window.matchMedia("(pointer: coarse)");
-    const update = () => setShowDepthSlider(media.matches);
+    const update = () => setIsCoarsePointer(media.matches);
     update();
     if (typeof media.addEventListener === "function") {
       media.addEventListener("change", update);
@@ -347,14 +347,14 @@ export function ImmersiveExperience() {
       <div className="sticky top-0 h-screen overflow-hidden">
         <motion.div
           className="absolute inset-0 z-0"
-          style={showDepthSlider ? undefined : { filter: tunnelFilter }}
+          style={isCoarsePointer ? undefined : { filter: tunnelFilter }}
         >
           <NightTunnelScene
             progress={progress}
             finalProgress={finalProgress}
             candlesOff={candlesOff}
             cinematicPause={cinematicPause}
-            lowPerformance={showDepthSlider}
+            lowPerformance={isCoarsePointer}
             onHouseOpen={handleHouseOpen}
             onCakePress={() => {
               if (!canBlow) {
@@ -442,19 +442,17 @@ export function ImmersiveExperience() {
           </span>
         </div>
 
-        {showDepthSlider && (
-          <div className="absolute right-2 top-1/2 z-65 -translate-y-1/2 rounded-2xl border border-[#f2d8df]/30 bg-[#120a12]/72 px-2 py-3 backdrop-blur-md">
-            <input
-              aria-label="Control de profundidad"
-              type="range"
-              min={0}
-              max={100}
-              value={Math.round(progress * 100)}
-              onChange={(event) => handleDepthSliderChange(Number(event.target.value))}
-              className="h-40 w-8 cursor-pointer accent-[#ffd5c6] [writing-mode:bt-lr] [-webkit-appearance:slider-vertical]"
-            />
-          </div>
-        )}
+        <div className="absolute right-2 top-1/2 z-65 -translate-y-1/2 rounded-2xl border border-[#f2d8df]/30 bg-[#120a12]/72 px-2 py-3 backdrop-blur-md">
+          <input
+            aria-label="Control de profundidad"
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(progress * 100)}
+            onChange={(event) => handleDepthSliderChange(Number(event.target.value))}
+            className="h-40 w-8 cursor-pointer accent-[#ffd5c6] [writing-mode:bt-lr] [-webkit-appearance:slider-vertical]"
+          />
+        </div>
 
         <motion.aside
           className="absolute bottom-3 left-1/2 z-60 w-[min(94vw,32rem)] -translate-x-1/2 rounded-2xl border border-[#f2d8df]/28 bg-[#120a12]/80 p-3 text-left text-[#ffeef3] shadow-[0_0_42px_rgba(255,171,128,0.2)] backdrop-blur-md sm:bottom-4 sm:p-4 md:p-5"
