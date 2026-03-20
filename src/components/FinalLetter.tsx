@@ -45,7 +45,7 @@ export function FinalBook({ visible }: FinalBookProps) {
       transition={{ duration: 0.8 }}
     >
       <motion.div
-        className="pointer-events-auto absolute right-3 top-[8%] w-[min(88vw,22rem)] sm:right-6 md:right-8"
+        className="pointer-events-auto absolute right-3 top-[45%] w-[min(88vw,22rem)] sm:top-[30%] md:top-[18%] lg:top-[10%] sm:right-4 md:right-8"
         initial={false}
         animate={{
           opacity: visible && !opened ? 1 : 0,
@@ -54,17 +54,21 @@ export function FinalBook({ visible }: FinalBookProps) {
         }}
         transition={{ duration: 0.5 }}
       >
-        <div className="relative h-32 sm:h-36">
-          <div className="absolute inset-x-0 bottom-0 h-24 rounded-b-2xl border border-[#f5d4db]/30 bg-[#26121d]/88" />
-          <div className="absolute inset-x-0 bottom-0 h-24 rounded-t-2xl border border-[#f5d4db]/30 bg-[#3b1728]/92" />
+        <div className="relative flex h-24 sm:h-32 items-center justify-center translate-y-4 sm:translate-y-6">
+          {/* Botón */}
           <button
             type="button"
             onClick={() => setOpened(true)}
-            className="absolute left-1/2 top-[54%] h-8 w-8 -translate-x-1/2 rounded-full border border-[#ffd5c6]/70 bg-[#ffd5c6]/30 text-xs text-[#fff1f4] shadow-[0_0_22px_rgba(255,191,156,0.45)] hover:bg-[#ffd5c6]/45"
-            aria-label="Abrir libro"
+            className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-[#ffd5c6]/70 bg-[#ffd5c6]/30 text-sm sm:text-base text-[#fff1f4] shadow-[0_0_25px_rgba(255,191,156,0.45)] hover:bg-[#ffd5c6]/45 transition"
+            aria-label="Abrir"
           >
             +
           </button>
+
+          {/* Mensaje */}
+          <p className="absolute bottom-1 text-[10px] sm:text-xs tracking-[0.12em] text-[#f4dbe1]/70">
+            toca aquí…
+          </p>
         </div>
       </motion.div>
 

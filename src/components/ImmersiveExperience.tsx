@@ -40,6 +40,7 @@ export function ImmersiveExperience() {
   const [anticipation, setAnticipation] = useState(false);
   const [wishMessageVisible, setWishMessageVisible] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
+  const [showDepthSlider, setShowDepthSlider] = useState(false);
   const [canBlow, setCanBlow] = useState(false);
   const [ruptureActive, setRuptureActive] = useState(false);
   const [ruptureDone, setRuptureDone] = useState(false);
@@ -85,6 +86,18 @@ export function ImmersiveExperience() {
       }
     };
   }, [scrollYProgress]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(pointer: coarse)");
+    const update = () => setShowDepthSlider(media.matches);
+    update();
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
 
   const coldOverlay = useTransform(scrollYProgress, [0, 0.7, 1], [0.72, 0.32, 0]);
   const warmOverlay = useTransform(scrollYProgress, [0.55, 1], [0, 0.8]);
@@ -148,18 +161,12 @@ export function ImmersiveExperience() {
 
   useEffect(() => {
     if (!enabled) return;
-    if (ruptureActive) {
-      setVolume(0.12);
-      return;
-    }
-    if (progress > 0.86 && !completed) {
-      setAnticipation(true);
-      setVolume(0.2);
-      return;
-    }
-    setAnticipation(false);
-    setVolume(completed ? 0.42 : 0.3);
-  }, [completed, enabled, progress, ruptureActive, setVolume]);
+    setVolume(0.34);
+  }, [enabled, setVolume]);
+
+  useEffect(() => {
+    setAnticipation(progress > 0.86 && !completed);
+  }, [completed, progress]);
 
   useEffect(() => {
     if (!enabled) {
@@ -334,7 +341,21 @@ export function ImmersiveExperience() {
     }, 1400);
   };
 
+  const handleDepthSliderChange = (value: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const ratio = Math.min(1, Math.max(0, value / 100));
+    const containerTop = container.getBoundingClientRect().top + window.scrollY;
+    const maxScrollable = Math.max(1, container.offsetHeight - window.innerHeight);
+    const targetY = containerTop + ratio * maxScrollable;
+    window.scrollTo({ top: targetY, behavior: "auto" });
+  };
+
   const activePhase = useMemo(() => {
+    const finalePhase = STORY_PHASES.find((phase) => phase.id === "finale");
+    if (finalePhase && progress >= 0.88) {
+      return finalePhase;
+    }
     for (let index = 0; index < STORY_PHASES.length; index += 1) {
       const phase = STORY_PHASES[index];
       const isLast = index === STORY_PHASES.length - 1;
@@ -441,6 +462,20 @@ export function ImmersiveExperience() {
           </span>
         </div>
 
+        {showDepthSlider && (
+          <div className="absolute right-2 top-1/2 z-65 -translate-y-1/2 rounded-2xl border border-[#f2d8df]/30 bg-[#120a12]/72 px-2 py-3 backdrop-blur-md">
+            <input
+              aria-label="Control de profundidad"
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(progress * 100)}
+              onChange={(event) => handleDepthSliderChange(Number(event.target.value))}
+              className="h-40 w-8 cursor-pointer accent-[#ffd5c6] [writing-mode:bt-lr] [-webkit-appearance:slider-vertical]"
+            />
+          </div>
+        )}
+
         <motion.aside
           className="absolute bottom-3 left-1/2 z-60 w-[min(94vw,32rem)] -translate-x-1/2 rounded-2xl border border-[#f2d8df]/28 bg-[#120a12]/80 p-3 text-left text-[#ffeef3] shadow-[0_0_42px_rgba(255,171,128,0.2)] backdrop-blur-md sm:bottom-4 sm:p-4 md:p-5"
           initial={false}
@@ -505,7 +540,7 @@ export function ImmersiveExperience() {
 
         {finaleFocusActive && (
           <motion.div
-            className="absolute bottom-3 z-50 w-[min(92vw,20rem)] px-3 text-left sm:bottom-6 sm:left-6 sm:px-4 md:bottom-8 md:left-8"
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,20rem)] px-3 text-left sm:bottom-6 sm:left-6 sm:translate-x-0 sm:px-4 md:bottom-8 md:left-8"
             initial={{ opacity: 0, y: 24, x: -24 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -568,7 +603,7 @@ export function ImmersiveExperience() {
         </div>
 
         <motion.div
-          className="pointer-events-none absolute inset-x-0 bottom-20 z-40 text-center"
+          className="pointer-events-none absolute inset-x-0 bottom-28 sm:bottom-24 md:bottom-30 z-40 text-center"
           initial={false}
           animate={{ opacity: wishMessageVisible ? 1 : 0, y: wishMessageVisible ? 0 : 16 }}
           transition={{ duration: 1.2 }}
