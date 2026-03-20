@@ -24,7 +24,7 @@ export function HouseMemoriesModal({ open, onClose }: HouseMemoriesModalProps) {
         className="max-h-[92vh] w-full max-w-7xl overflow-y-auto rounded-3xl border border-[#b38aa0]/30 bg-[#11070d]/92 p-4 text-[#f2d7de] shadow-[0_24px_120px_rgba(0,0,0,0.45)] sm:p-6 md:p-8 xl:max-w-384"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl sm:text-2xl md:text-3xl">Dentro de tu hogar</h3>
+          <h3 className="font-serif text-xl sm:text-2xl md:text-3xl">Dentro de tu este lugar...</h3>
           <button
             type="button"
             onClick={onClose}
@@ -35,7 +35,7 @@ export function HouseMemoriesModal({ open, onClose }: HouseMemoriesModalProps) {
         </div>
 
         <p className="mt-4 text-sm leading-relaxed text-[#f2d7de]/85">
-          Aqui yacen fotos que celebrar tu día especial:
+          Yacen recuerdos que te celebran en este momento:
         </p>
 
         <div className="mt-6 grid gap-6 md:grid-cols-3">
