@@ -619,9 +619,15 @@ export function ImmersiveExperience() {
           }}
           transition={{ duration: 1.25, ease: "easeInOut" }}
         >
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center px-6 text-center">
             <motion.p
-              className="font-serif text-3xl text-[#fff2f6] md:text-5xl"
+              className="
+        font-serif 
+        text-xl sm:text-2xl md:text-5xl 
+        text-[#fff2f6] 
+        leading-relaxed
+        max-w-[90%] sm:max-w-md
+      "
               initial={false}
               animate={{
                 opacity: enteringHouse ? 1 : 0,
@@ -633,7 +639,6 @@ export function ImmersiveExperience() {
             </motion.p>
           </div>
         </motion.div>
-
         <FinalBook visible={finaleFocusActive} />
         <HouseMemoriesModal open={houseOpen} onClose={() => setHouseOpen(false)} />
         {/* <audio ref={voiceRef} preload="none" src={AUDIO_PATHS.voice} />
