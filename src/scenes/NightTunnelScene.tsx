@@ -98,6 +98,7 @@ function World({
   useFrame((state, delta) => {
     frameCounterRef.current += 1;
     const updateDynamicTerrain = !lowPerformance || frameCounterRef.current % 3 === 0;
+    const updateSecondaryMotion = !lowPerformance || frameCounterRef.current % 2 === 0;
     const rhythmFactor = cinematicPause
       ? 0.08
       : progress > 0.84 && candlesOff === 0
@@ -105,8 +106,8 @@ function World({
         : progress > 0.46 && progress < 0.52
           ? 0.55
           : 1;
-    const pointerX = state.pointer.x;
-    const pointerY = state.pointer.y;
+    const pointerX = lowPerformance ? 0 : state.pointer.x;
+    const pointerY = lowPerformance ? 0 : state.pointer.y;
     const t = state.clock.elapsedTime;
     const endFade = THREE.MathUtils.smoothstep(finalProgress, 0.8, 1);
     const cakeFocus = THREE.MathUtils.smoothstep(progress, 0.84, 0.96);
@@ -206,17 +207,20 @@ function World({
       windowMaterial.opacity = 1 - endFade * 0.96;
     });
 
-    flowerSeeds.forEach((seed, index) => {
-      const obj = scene.getObjectByName(`flower-${index}`);
-      if (!obj) return;
-      obj.rotation.z = Math.sin(state.clock.elapsedTime * 0.65 + index * 0.45) * 0.08;
-      const valleyLift =
-        Math.exp(-((seed.x * seed.x) / 42)) * 0.38 -
-        Math.exp(-((seed.z + 11.5) * (seed.z + 11.5)) / 30) * 0.2;
-      obj.position.y = -1.78 + valleyLift + Math.sin(t * 0.8 * rhythmFactor + index) * 0.03;
-    });
+    if (updateSecondaryMotion) {
+      flowerSeeds.forEach((seed, index) => {
+        const obj = scene.getObjectByName(`flower-${index}`);
+        if (!obj) return;
+        obj.rotation.z = Math.sin(state.clock.elapsedTime * 0.65 + index * 0.45) * 0.08;
+        const valleyLift =
+          Math.exp(-((seed.x * seed.x) / 42)) * 0.38 -
+          Math.exp(-((seed.z + 11.5) * (seed.z + 11.5)) / 30) * 0.2;
+        obj.position.y = -1.78 + valleyLift + Math.sin(t * 0.8 * rhythmFactor + index) * 0.03;
+      });
+    }
 
     ringZ.forEach((z, index) => {
+      if (lowPerformance && index % 2 !== 0) return;
       const ring = scene.getObjectByName(`ring-${index}`) as THREE.Mesh | null;
       if (!ring) return;
       ring.position.z = z + progress * 34;
@@ -225,7 +229,7 @@ function World({
     });
 
     const fogPlane = scene.getObjectByName("fog-plane");
-    if (fogPlane) {
+    if (fogPlane && updateSecondaryMotion) {
       fogPlane.position.z = -18 + progress * 10;
       fogPlane.rotation.z += delta * 0.02 * rhythmFactor;
     }
@@ -299,40 +303,41 @@ function World({
       }
     }
 
-    flameRefs.current.forEach((flame, index) => {
-      if (!flame) return;
-      const slot = candleSlots[index];
-      if (!slot) return;
-      const baseY = slot.stemHeight + 0.06;
-      const visible =
-        candlesOff === 0 ||
-        (candlesOff === 1 && index >= Math.ceil(flameRefs.current.length / 2));
-      flame.visible = visible;
-      const light = flameLightRefs.current[index];
-      if (light) light.visible = visible;
-      if (visible) {
-        const flicker = Math.sin(t * 9.2 + index * 1.53);
-        const swayX = Math.sin(t * 5.1 + index * 0.8) * 0.005 + pointerX * 0.008;
-        const swayZ = Math.cos(t * 4.6 + index * 1.1) * 0.0035;
-        flame.position.set(
-          swayX,
-          baseY + Math.max(0, flicker) * 0.01,
-          swayZ,
-        );
-        flame.scale.set(
-          0.78 + Math.abs(flicker) * 0.12,
-          0.95 + Math.abs(Math.cos(t * 7.4 + index)) * 0.32,
-          0.78 + Math.abs(flicker) * 0.1,
-        );
-        flame.rotation.z = swayX * 14;
-        if (light) {
-          light.position.set(swayX, baseY + 0.01, swayZ);
-          light.intensity = 0.52 + Math.abs(flicker) * 0.42;
-          light.distance = 2.2 + Math.abs(flicker) * 0.5;
+    if (updateSecondaryMotion) {
+      flameRefs.current.forEach((flame, index) => {
+        if (!flame) return;
+        const slot = candleSlots[index];
+        if (!slot) return;
+        const baseY = slot.stemHeight + 0.06;
+        const visible =
+          candlesOff === 0 ||
+          (candlesOff === 1 && index >= Math.ceil(flameRefs.current.length / 2));
+        flame.visible = visible;
+        const light = flameLightRefs.current[index];
+        if (light) light.visible = visible;
+        if (visible) {
+          const flicker = Math.sin(t * 9.2 + index * 1.53);
+          const swayX = Math.sin(t * 5.1 + index * 0.8) * 0.005 + pointerX * 0.008;
+          const swayZ = Math.cos(t * 4.6 + index * 1.1) * 0.0035;
+          flame.position.set(
+            swayX,
+            baseY + Math.max(0, flicker) * 0.01,
+            swayZ,
+          );
+          flame.scale.set(
+            0.78 + Math.abs(flicker) * 0.12,
+            0.95 + Math.abs(Math.cos(t * 7.4 + index)) * 0.32,
+            0.78 + Math.abs(flicker) * 0.1,
+          );
+          flame.rotation.z = swayX * 14;
+          if (light) {
+            light.position.set(swayX, baseY + 0.01, swayZ);
+            light.intensity = 0.52 + Math.abs(flicker) * 0.42;
+            light.distance = 2.2 + Math.abs(flicker) * 0.5;
+          }
         }
-      }
-    });
-
+      });
+    }
     smokeRefs.current.forEach((smoke, index) => {
       if (!smoke) return;
       const slot = candleSlots[index];
@@ -342,7 +347,7 @@ function World({
         candlesOff >= 2 ||
         (candlesOff === 1 && index < Math.ceil(smokeRefs.current.length / 2));
       smoke.visible = shouldShow;
-      if (shouldShow) {
+      if (shouldShow && updateSecondaryMotion) {
         smoke.position.x = Math.sin(t * 1.15 + index * 0.7) * 0.01;
         smoke.position.z = Math.cos(t * 1.05 + index * 0.6) * 0.008;
         smoke.position.y = baseY + Math.sin(t * 1.7 + index) * 0.06;
@@ -378,14 +383,16 @@ function World({
         saturation={0}
         speed={0.18}
       />
-      <Stars
-        radius={220}
-        depth={180}
-        count={lowPerformance ? 1800 : 5800}
-        factor={7}
-        saturation={0}
-        speed={0.08}
-      />
+      {!lowPerformance && (
+        <Stars
+          radius={220}
+          depth={180}
+          count={5800}
+          factor={7}
+          saturation={0}
+          speed={0.08}
+        />
+      )}
 
       {ringZ.map((z, index) => (
         <mesh key={z} name={`ring-${index}`} position={[0, 0.4, z]}>
@@ -640,14 +647,16 @@ function World({
           color="#d6e2ff"
           size={1.2}
         />
-        <Sparkles
-          count={lowPerformance ? 96 : 180}
-          scale={[46, 14, 42]}
-          position={[0, 4.8, -26]}
-          speed={0.05}
-          color="#c4d4ff"
-          size={1.45}
-        />
+        {!lowPerformance && (
+          <Sparkles
+            count={180}
+            scale={[46, 14, 42]}
+            position={[0, 4.8, -26]}
+            speed={0.05}
+            color="#c4d4ff"
+            size={1.45}
+          />
+        )}
       </group>
     </>
   );
